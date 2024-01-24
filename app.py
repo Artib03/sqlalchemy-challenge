@@ -1,34 +1,29 @@
 # Import the dependencies.
-from flask import Flask, jsonify
-
 import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func, inspect
 import datetime as dt
-
-engine = create_engine("sqlite:///hawaii.sqlite")
-
+import numpy as np
+import pandas as pd
+from flask import Flask, jsonify
 #################################################
 # Database Setup
 #################################################
+engine = create_engine("sqlite:///Resources/hawaii.sqlite")
 
 # reflect an existing database into a new model
 Base = automap_base()
-Base.prepare(autoload_with=engine)
 
 # reflect the tables
-Base.prepare(engine, reflect=True)
-
-#Base.classes.keys()
+Base.prepare(engine, reflect = True)
 
 # Save references to each table
 measuring_table = Base.classes.measurement
 station_table = Base.classes.station
 
 # Create our session (link) from Python to the DB
-session = Session(bind=engine)
-session.commit()
+session = Session(engine)
 
 #################################################
 # Flask Setup
