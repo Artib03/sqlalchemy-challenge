@@ -40,8 +40,8 @@ def welcome():
             f"/api/v1.0/precipitation"
             f"/api/v1.0/stations"
             f"/api/v1.0/tobs"
-            f"/api/v1.0/start"
-            f"/api/v1.0/start/end"
+            f"/api/v1.0/<start>"
+            f"/api/v1.0/<start>/<end>"
         )
 
 @app.route("/api/v1.0/precipitation")
@@ -73,23 +73,23 @@ def temp():
 
 @app.route("/api/v1.0/<start>")
 @app.route("/api/v1.0/<start>/<end>")
-def statistics(start=None , end=None):
-
+def statistics(start, end=None):
+    session = Session(engine)
 #Start Route
-    station_id = [func.min(measuring_table.tobs), func.avg(measuring_table.tobs), func.max(measuring_table.tobs)]
-#Start/End Route
+    sel = [func.min(measuring_table.tobs), func.avg(measuring_table.tobs), func.max(measuring_table.tobs)]
     if not end:
-        results = session.query(station_id).\
-            filter(measuring_table.date >= start).\
-            filter(measuring_table.date <= end).all()
-        before = list(np.ravel(results))
-        return jsonify(before)
-    then: results = session.query(station_id).\
-        filter(measuring_table.date >= start).\
-        filter(measuring_table.date <= end).all()
-    after = list(np.ravel(results))
-    return jsonify(before = after)
-#run link: http://127.0.0.1:5000/api/v1.0/start/api/v1.0/start/end
+        # When only the start date is provided
+        results = session.query(*sel).filter(measuring_table.date >= start).all()
+    else:
+        # When both the start and end dates are provided
+        results = session.query(*sel).filter(measuring_table.date >= start).filter(measuring_table.date <= end).all()
+    
+    session.close()
+    
+    # Convert results to a list
+    temps = list(np.ravel(results)) if results else []
+    return jsonify(temps=temps)
+#run link: http://127.0.0.1:5000/api/v1.0/2017-08-01/2017-08-05 for example, it gives the min,average and max prcp results respectively
 #last date in the set = 2017, 8, 23
  
 if __name__ == "__main__":
