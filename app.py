@@ -36,11 +36,12 @@ app = Flask(__name__)
 @app.route("/")
 def welcome():
         return (
+            "Available Routes:"
             f"/api/v1.0/precipitation"
             f"/api/v1.0/stations"
             f"/api/v1.0/tobs"
-            f"/api/v1.0/<start>"
-            f"/api/v1.0/<start>/<end>"
+            f"/api/v1.0/start"
+            f"/api/v1.0/start/end"
         )
 
 @app.route("/api/v1.0/precipitation")
@@ -72,9 +73,11 @@ def temp():
 
 @app.route("/api/v1.0/<start>")
 @app.route("/api/v1.0/<start>/<end>")
-def statistics(start=None, end=None):
+def statistics(start=None , end=None):
 
+#Start Route
     station_id = [func.min(measuring_table.tobs), func.avg(measuring_table.tobs), func.max(measuring_table.tobs)]
+#Start/End Route
     if not end:
         results = session.query(station_id).\
             filter(measuring_table.date >= start).\
@@ -87,6 +90,7 @@ def statistics(start=None, end=None):
     after = list(np.ravel(results))
     return jsonify(before = after)
 #run link: http://127.0.0.1:5000/api/v1.0/start/api/v1.0/start/end
+#last date in the set = 2017, 8, 23
  
 if __name__ == "__main__":
     app.run(debug=True)
